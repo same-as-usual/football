@@ -40,3 +40,9 @@ aside { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .attribution { margin-top: 18px; padding: 10px 0; border-top: 1px solid #2a3138; color: #9aa0a6; font-size: 12px; }
 
 @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+
+.header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.match-picker { background: #22282e; color: #e8eaed; border: 1px solid #3a4148; border-radius: 6px; padding: 6px 10px; max-width: 380px; }
+.story { font-size: 13px; line-height: 1.55; color: #d5d9dd; margin: 6px 0; }
+.panel button { background: #22282e; color: #e8eaed; border: 1px solid #3a4148; border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+.panel button:hover { background: #2a3138; }

@@ -10,6 +10,17 @@
    ],
    "competition": "UEFA Euro",
    "season": "2020"
+  },
+  {
+   "matchId": "metrica-sample-game-2",
+   "home": "Home",
+   "away": "Away",
+   "score": [
+    3,
+    2
+   ],
+   "competition": "Metrica Sample",
+   "season": "anonymised"
   }
  ]
 }

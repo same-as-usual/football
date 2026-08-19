@@ -61,7 +61,8 @@ class MatchMeta(BaseModel):
 class ChunkIndex(BaseModel):
     events: str = "events.json"
     shots: str = "shots.json"
-    frames: Optional[str] = "frames.json"
+    frames: Optional[str] = "frames.json"  # keyframes (event-plane) or tracking.json (continuous)
+    spaceGrids: Optional[str] = None
     freezeFrames: Optional[str] = None
     narrative: Optional[str] = None
 
@@ -180,6 +181,42 @@ class FrameChunk(BaseModel):
     interpolated: bool
     frameRateHz: Optional[float] = None
     keyframes: list[Keyframe]
+
+
+# --------------------------------------------------------------------------- #
+# Continuous tracking (compact flat-array format — kilobytes matter at 5+ Hz)
+# --------------------------------------------------------------------------- #
+class TrackingPlayer(BaseModel):
+    pid: str
+    team: Literal["home", "away"]
+    num: int
+    keeper: bool = False
+
+
+class TrackingChunk(BaseModel):
+    """frames: [period, t_ms, ball_x, ball_y, p0_x, p0_y, p1_x, p1_y, ...]
+    aligned to `players`; None where a player is off-pitch."""
+    interpolated: bool = False
+    frameRateHz: float
+    players: list[TrackingPlayer]
+    frames: list[list[Optional[float]]]
+
+
+# --------------------------------------------------------------------------- #
+# Space grids (pitch control) — values flat row-major, row 0 = y min
+# --------------------------------------------------------------------------- #
+class SpaceSnapshot(BaseModel):
+    period: int
+    t: int  # ms from period start
+    values: list[float]  # P(home controls cell), flat row-major
+
+
+class SpaceGridChunk(BaseModel):
+    kind: Literal["pitch_control"] = "pitch_control"
+    cols: int
+    rows: int
+    physics: dict[str, float]  # documented Spearman params used
+    snapshots: list[SpaceSnapshot]
 
 
 # --------------------------------------------------------------------------- #

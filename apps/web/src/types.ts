@@ -97,3 +97,34 @@ export interface Keyframe { t: number; period: number; ball: Point; players: Pla
 export interface FrameChunk { interpolated: boolean; keyframes: Keyframe[] }
 
 export interface XThreatGrid { cols: number; rows: number; values: number[][]; iterations: number; converged: boolean }
+
+export interface TrackingPlayer { pid: string; team: 'home' | 'away'; num: number; keeper: boolean }
+
+export interface TrackingChunk {
+  interpolated: boolean
+  frameRateHz: number
+  players: TrackingPlayer[]
+  // [period, t_ms, ball_x, ball_y, p0_x, p0_y, ...] — null when off-pitch
+  frames: (number | null)[][]
+}
+
+export interface SpaceSnapshot { period: number; t: number; values: number[] }
+
+export interface SpaceGridChunk {
+  kind: 'pitch_control'
+  cols: number
+  rows: number
+  physics: Record<string, number>
+  snapshots: SpaceSnapshot[]
+}
+
+export interface MatchListItem {
+  matchId: string
+  home: string
+  away: string
+  score: [number, number]
+  competition: string
+  season: string
+}
+
+export interface Narrative { text: string; backend: string; attribution: string }

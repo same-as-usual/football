@@ -8,7 +8,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from football_core.model import EventChunk, FrameChunk, Manifest, ShotChunk, XThreatGrid
+from football_core.model import (
+    EventChunk, FrameChunk, Manifest, ShotChunk, SpaceGridChunk, TrackingChunk, XThreatGrid,
+)
 from football_licensing.entitlements import COMMERCIAL_BUILD
 
 
@@ -23,6 +25,8 @@ def publish_bundle(
     shots: ShotChunk,
     frames: FrameChunk | None = None,
     xt_grid: XThreatGrid | None = None,
+    tracking: TrackingChunk | None = None,
+    space_grids: SpaceGridChunk | None = None,
 ) -> Path:
     if not manifest.provenance.attributionText.strip():
         raise ComplianceError("Refusing to publish artifact without attribution text.")
@@ -41,6 +45,10 @@ def publish_bundle(
         (out / "frames.json").write_text(frames.model_dump_json(exclude_none=True))
     if xt_grid is not None:
         (out / "xt_grid.json").write_text(xt_grid.model_dump_json())
+    if tracking is not None:
+        (out / "tracking.json").write_text(tracking.model_dump_json())
+    if space_grids is not None:
+        (out / "space.json").write_text(space_grids.model_dump_json())
 
     # top-level index of published matches
     index_path = Path(out_dir) / "index.json"

@@ -8,7 +8,18 @@ A free, browser-based football match you can **scrub, interrogate, and play with
 - **Playable counterfactuals** — drag a shot anywhere on the pitch; xG and its explanation recompute instantly, client-side, from the shipped coefficients.
 - **Attribution & compliance built in** — every artifact carries provenance; commercial builds refuse to publish data not cleared for commercial use.
 
-Demo bundle: **UEFA Euro 2020 final, Italy 1–1 England** (StatsBomb Open Data, events + 360).
+- **Space overlays** — velocity-aware **Spearman (2018) pitch control** computed from 25 Hz tracking
+  (documented physics: vmax 5 m/s, reaction 0.7 s, λ 4.3, 0.04 s integration steps), plus live
+  client-side **Voronoi** tessellation during playback.
+- **Auto-generated match story** — LLM "wordalisation" of structured match facts (Claude behind a
+  swappable `LLMClient`, deterministic template fallback with zero hallucination risk), plus a
+  server-rendered **shareable PNG match card**.
+
+Demo bundles:
+- **UEFA Euro 2020 final, Italy 1–1 England** (StatsBomb Open Data: events + 360 freeze-frames,
+  extra time + shootout handled) — xT, glass-box xG, interpolated replay.
+- **Metrica Sample Game 2** (continuous 25 Hz tracking) — full 22-player animated replay,
+  pitch control, Voronoi.
 
 ## Architecture (commercial-upgradeable by construction)
 
@@ -32,8 +43,11 @@ policy entry — zero changes to core, API, or frontend.
 # Python (uses uv; plain venv+pip works too)
 uv venv .venv && uv pip install -e ".[dev]"
 
-# 1. Run the pipeline (downloads Euro 2020 open data, trains xT + xG, publishes artifacts)
+# 1a. Event-plane pipeline (downloads Euro 2020 open data, trains xT + xG, publishes artifacts)
 .venv/bin/python -m football_pipeline.run --competition 55 --season 43
+
+# 1b. Tracking pipeline (Metrica sample: continuous replay + Spearman pitch control)
+.venv/bin/python -m football_pipeline.run_metrica
 
 # 2. Build the frontend
 cd apps/web && npm install && npm run build && cd ../..
@@ -54,8 +68,16 @@ reconstruction, compliance-refusal).
   (Metrica/SkillCorner samples — Phase 2); StatsBomb 360 gives freeze-frames at events,
   which is what the replay honestly labels as interpolated.
 
+## Narrative backends
+
+`packages/narrative` picks the backend at runtime: with `ANTHROPIC_API_KEY` (or an
+`ant auth` profile token) set, stories are written by Claude from a **structured fact
+sheet only** (anti-hallucination: the model never sees free prose, and penalty
+shootouts/extra time are pre-resolved in the facts). Without credentials, a
+deterministic template narrator produces a factual story at zero cost.
+
 ## Roadmap
 
-- **Phase 2**: Spearman pitch-control from Metrica tracking sample; Voronoi overlays; SHAP option.
-- **Phase 3**: LLM match narratives ("wordalisation" of structured metadata) + shareable cards.
-- **Phase 4**: full-competition ingestion, CDN artifacts, real entitlements/paywall, paid-feed adapters.
+- ~~Phase 2: pitch control + Voronoi overlays~~ ✅
+- ~~Phase 3: narratives + shareable cards~~ ✅ (playable pitch-control counterfactuals pending)
+- **Phase 4**: full-competition ingestion, CDN artifacts, real entitlements/paywall, paid-feed adapters, SHAP option.
