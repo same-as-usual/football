@@ -14,12 +14,15 @@ const LABELS: Record<string, string> = {
 function Waterfall({ result }: { result: XgResult }) {
   const items = result.contributions
   const max = Math.max(...items.map((c) => Math.abs(c.logOddsContribution)), 0.5)
-  const rowH = 26, w = 300, mid = w / 2
+  // dedicated label column so bars never overlap text
+  const labelW = 104, valueW = 44, rowH = 26, w = 300
+  const chartW = w - labelW - valueW
+  const mid = labelW + chartW / 2
   return (
     <svg width={w} height={items.length * rowH + 8} style={{ display: 'block' }}>
       <line x1={mid} y1={0} x2={mid} y2={items.length * rowH} stroke="#555" strokeDasharray="3 3" />
       {items.map((c, i) => {
-        const len = (Math.abs(c.logOddsContribution) / max) * (mid - 10)
+        const len = (Math.abs(c.logOddsContribution) / max) * (chartW / 2 - 4)
         const pos = c.logOddsContribution >= 0
         return (
           <g key={c.feature} transform={`translate(0, ${i * rowH})`}>
@@ -47,8 +50,12 @@ interface Props {
 }
 
 export default function ShotInspector({ shot, model, cfLoc, onReset, onClose }: Props) {
-  const live = counterfactual(model, shot, cfLoc ?? shot.location)
-  const moved = cfLoc && (cfLoc.x !== shot.location.x || cfLoc.y !== shot.location.y)
+  const moved = !!cfLoc && (cfLoc.x !== shot.location.x || cfLoc.y !== shot.location.y)
+  // Show the published (pipeline) values until the user actually drags —
+  // avoids sub-0.001 rounding drift between pipeline and client geometry.
+  const live: XgResult = moved
+    ? counterfactual(model, shot, cfLoc)
+    : { xg: shot.xg, logOdds: shot.logOdds, baselineXg: shot.baselineXg, contributions: shot.contributions }
   return (
     <div className="panel inspector">
       <div className="panel-head">

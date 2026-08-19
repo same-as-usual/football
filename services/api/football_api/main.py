@@ -9,6 +9,8 @@ import json
 import os
 from pathlib import Path
 
+import re
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -37,6 +39,8 @@ def list_matches() -> dict:
 def get_chunk(match_id: str, chunk: str):
     if chunk not in ALLOWED_CHUNKS:
         raise HTTPException(404, "unknown chunk")
+    if not re.fullmatch(r"[a-z0-9-]+", match_id):  # defense-in-depth vs traversal
+        raise HTTPException(404, "invalid match id")
     path = ARTIFACTS / match_id / chunk
     if not path.exists():
         raise HTTPException(404, "not found")
